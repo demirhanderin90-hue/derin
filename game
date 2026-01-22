@@ -1,0 +1,62 @@
+using UnityEngine;
+
+public class PlayerMovement : MonoBehaviour
+{
+    [Header("Movement Settings")]
+    public float moveSpeed = 5f;
+    public float jumpForce = 12f;
+
+    [Header("Ground Check Settings")]
+    public Transform groundCheck;       // Empty GameObject at player's feet
+    public float groundCheckRadius = 0.2f;
+    public LayerMask groundLayer;       // Assign in Inspector
+
+    private Rigidbody2D rb;
+    private bool isGrounded;
+    private float moveInput;
+    private bool jumpPressed;
+
+    void Start()
+    {
+        rb = GetComponent<Rigidbody2D>();
+    }
+
+    void Update()
+    {
+        // Get horizontal movement input
+        moveInput = Input.GetAxisRaw("Horizontal");
+
+        // Check if jump button is pressed
+        if (Input.GetButtonDown("Jump") && isGrounded)
+        {
+            jumpPressed = true;
+        }
+    }
+
+    void FixedUpdate()
+    {
+        // Move the player
+        rb.velocity = new Vector2(moveInput * moveSpeed, rb.velocity.y);
+
+        // Ground check
+        isGrounded = Physics2D.OverlapCircle(groundCheck.position, groundCheckRadius, groundLayer);
+
+        // Jump
+        if (jumpPressed)
+        {
+            rb.AddForce(Vector2.up * jumpForce, ForceMode2D.Impulse);
+            jumpPressed = false;
+        }
+    }
+
+    // Draw ground check radius in editor
+    void OnDrawGizmosSelected()
+    {
+        if (groundCheck != null)
+        {
+            Gizmos.color = Color.red;
+            Gizmos.DrawWireSphere(groundCheck.position, groundCheckRadius);
+        }
+    }
+}
+
